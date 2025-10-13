@@ -16,7 +16,7 @@ import {
 
 import Link from "next/link";
 
-import { conversations } from "@/data/data";
+import { Conversation } from "@prisma/client";
 
 const items = [
   {
@@ -31,7 +31,12 @@ const items = [
   },
 ];
 
-const SideBar = (props: React.ComponentProps<typeof Sidebar>) => {
+const SideBar = ({
+  conversations,
+  ...props
+}: {
+  conversations: Conversation[];
+} & React.ComponentProps<typeof Sidebar>) => {
   const { open } = useSidebar();
 
   return (
