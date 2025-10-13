@@ -2,6 +2,10 @@ import React from "react";
 
 import ThemeProvider from "@/components/providers/ThemeProvider";
 
+import { Toaster } from "@/components/ui/sonner";
+
+import { CheckIcon, XIcon } from "lucide-react";
+
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <ThemeProvider
@@ -11,6 +15,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
       disableTransitionOnChange
     >
       {children}
+      <Toaster position="top-right" closeButton={true} />
     </ThemeProvider>
   );
 };
