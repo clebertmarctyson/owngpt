@@ -1,14 +1,17 @@
 import React from "react";
 
-import { conversations } from "@/data/data";
-
 import Link from "next/link";
 
 import { LinkIcon, Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 
-const Conversations = () => {
+import { prisma } from "@/lib/prisma";
+import { Conversation } from "@/data/data";
+
+const Conversations = async () => {
+  const conversations = await prisma.conversation.findMany();
+
   return (
     <div className="w-[50vw] h-screen overflow-hidden mx-auto py-8 relative flex flex-col gap-8">
       <h1 className="text-3xl font-bold">Conversations</h1>

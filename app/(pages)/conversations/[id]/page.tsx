@@ -1,28 +1,34 @@
-"use client";
-
-import { Copy, LucideSend } from "lucide-react";
+import { LucideSend } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
 import ReactMarkdown from "react-markdown";
+
 import remarkGfm from "remark-gfm";
 
-import { toast } from "sonner";
+import { Message } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import CopyButton from "@/components/CopyButton";
 
-import { useParams } from "next/navigation";
-
-import { Conversation, conversations } from "@/data/data";
-
-import { Message } from "@/data/data";
-
-const ConversationDetails = () => {
-  const { id }: { id: string } = useParams();
-
-  const conversation: Conversation = conversations.find(
-    (conversation: Conversation) => conversation.id === Number(id)
-  ) as Conversation;
+const ConversationDetails = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
+  const conversation = await prisma.conversation.findUnique({
+    where: {
+      id: (await params).id,
+    },
+    include: {
+      messages: {
+        orderBy: {
+          createdAt: "asc",
+        },
+      },
+    },
+  });
 
   return (
     <div className="w-[50vw] h-screen overflow-hidden mx-auto py-8 relative flex flex-col gap-4">
@@ -46,14 +52,7 @@ const ConversationDetails = () => {
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {message.content}
                 </ReactMarkdown>
-                <Copy
-                  className="cursor-pointer self-end"
-                  size={30}
-                  onClick={() => {
-                    navigator.clipboard.writeText(message.content);
-                    toast("Copied to clipboard");
-                  }}
-                />
+                <CopyButton text={message?.content} />
               </div>
               <Separator className="my-8" />
             </div>
