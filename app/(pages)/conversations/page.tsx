@@ -19,7 +19,7 @@ const Conversations = async ({
     ? await prisma.conversation.findMany({
         where: {
           title: {
-            contains: "Creating a very powerful AI assistant using Node.js",
+            contains: search,
           },
         },
       })
