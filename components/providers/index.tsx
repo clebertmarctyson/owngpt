@@ -1,10 +1,14 @@
+"use client";
+
 import React from "react";
 
 import ThemeProvider from "@/components/providers/ThemeProvider";
 
 import { Toaster } from "@/components/ui/sonner";
 
-import { CheckIcon, XIcon } from "lucide-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -14,7 +18,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       <Toaster position="top-right" closeButton={true} />
     </ThemeProvider>
   );

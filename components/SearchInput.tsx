@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const SearchInput = () => {
+const SearchInput = ({ ...props }) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -28,10 +28,10 @@ const SearchInput = () => {
 
   return (
     <Input
+      {...props}
       type="search"
       value={search}
       onChange={(e) => setSearch(e.target.value)}
-      className="flex-1 p-8"
       placeholder="Search conversations..."
     />
   );
