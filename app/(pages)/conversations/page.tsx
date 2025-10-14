@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { prisma } from "@/lib/prisma";
 
 import SearchInput from "@/components/SearchInput";
+import { Button } from "@/components/ui/button";
 
 const Conversations = async ({
   searchParams,
@@ -36,27 +37,27 @@ const Conversations = async ({
 
       <Separator />
 
-      <div className="flex justify-between items-center gap-8 mt-8">
+      <div className="flex justify-between items-center gap-8">
         <Link
           href="/"
-          className="flex gap-4 items-center rounded-sm p-4 bg-accent"
+          className="h-full flex gap-4 p-4 items-center rounded-sm bg-accent"
         >
           <Plus size={20} />
           <p className="text-lg">New Conversation</p>
         </Link>
 
-        <SearchInput />
+        <SearchInput className="flex-1 h-full flex gap-4 p-4 items-center rounded-sm bg-accent" />
       </div>
 
-      <div className="flex flex-col gap-4 py-8 box-border h-[calc(100%-8rem)] overflow-y-scroll no-scrollbar">
+      <div className="flex flex-col gap-4 py-4 box-border h-[calc(100%-8rem)] overflow-y-scroll no-scrollbar">
         {conversations?.map((conversation) => (
           <Link
             key={conversation.id}
             href={`/conversations/${conversation?.id}`}
-            className="flex gap-4 items-start bg-secondary w-fit rounded-sm p-4"
+            className="flex gap-4 items-start justify-between bg-black w-full rounded-sm p-2"
           >
-            <p className="text-lg">{conversation?.title}</p>
-            <LinkIcon size={20} />
+            <p className="w-[80%] text-lg">{conversation?.title}</p>
+            <LinkIcon size={18} color="blue" />
           </Link>
         ))}
       </div>
