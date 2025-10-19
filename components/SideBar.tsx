@@ -1,6 +1,8 @@
 "use client";
 
-import { FolderArchive, MessageCircle, Plus } from "lucide-react";
+import { FolderArchive, MessageCircle, Plus, Trash } from "lucide-react";
+
+import { QueryClient, useMutation } from "@tanstack/react-query";
 
 import {
   Sidebar,
@@ -17,6 +19,8 @@ import {
 import Link from "next/link";
 
 import { Conversation } from "@prisma/client";
+
+import { useRouter } from "next/navigation";
 
 const items = [
   {
@@ -38,6 +42,26 @@ const SideBar = ({
   conversations: Conversation[];
 } & React.ComponentProps<typeof Sidebar>) => {
   const { open } = useSidebar();
+
+  const queryClient = new QueryClient();
+
+  const router = useRouter();
+
+  const { mutate } = useMutation({
+    mutationFn: async (id: string) => {
+      await fetch(`/api/conversations/${id}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error("Error deleting conversation:", error);
+    },
+  });
 
   return (
     <Sidebar {...props}>
@@ -73,10 +97,14 @@ const SideBar = ({
 
                 {conversations.map((conversation) => (
                   <SidebarMenuItem key={conversation.id}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton>
                       <Link href={`/conversations/${conversation.id}`}>
                         <span>{conversation.title}</span>
                       </Link>
+                      <Trash
+                        className="ml-auto"
+                        onClick={() => mutate(conversation.id)}
+                      />
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

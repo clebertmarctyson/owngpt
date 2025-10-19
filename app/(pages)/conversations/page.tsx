@@ -1,13 +1,15 @@
 import Link from "next/link";
 
-import { LinkIcon, Plus } from "lucide-react";
+import { LinkIcon, Plus, Trash } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
 
 import { prisma } from "@/lib/prisma";
 
 import SearchInput from "@/components/SearchInput";
-import { Button } from "@/components/ui/button";
+
+import { revalidatePath } from "next/cache";
+import DeleteButton from "@/components/DeleteButton";
 
 const Conversations = async ({
   searchParams,
@@ -15,6 +17,17 @@ const Conversations = async ({
   searchParams: Promise<{ search: string }>;
 }) => {
   const { search } = await searchParams;
+
+  const handleClick = async ({ id }: { id: string }) => {
+    "use server";
+    await prisma.conversation.delete({
+      where: {
+        id,
+      },
+    });
+
+    revalidatePath("/conversations");
+  };
 
   const conversations = search
     ? await prisma.conversation.findMany({
@@ -49,18 +62,24 @@ const Conversations = async ({
         <SearchInput className="flex-1 h-full flex gap-4 p-4 items-center rounded-sm bg-accent" />
       </div>
 
-      <div className="flex flex-col gap-4 py-4 box-border h-[calc(100%-8rem)] overflow-y-scroll no-scrollbar">
+      <ul className="flex flex-col gap-4 py-4 box-border h-[calc(100%-8rem)] overflow-y-scroll no-scrollbar">
         {conversations?.map((conversation) => (
-          <Link
-            key={conversation.id}
-            href={`/conversations/${conversation?.id}`}
-            className="flex gap-4 items-start justify-between bg-black w-full rounded-sm p-2"
-          >
+          <li key={conversation.id} className="flex gap-4 items-center">
             <p className="w-[80%] text-lg">{conversation?.title}</p>
-            <LinkIcon size={18} color="blue" />
-          </Link>
+
+            <div className="flex justify-between items-center gap-4">
+              <Link
+                key={conversation.id}
+                href={`/conversations/${conversation?.id}`}
+              >
+                <LinkIcon size={25} />
+              </Link>
+
+              <DeleteButton handleClick={handleClick} />
+            </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 };

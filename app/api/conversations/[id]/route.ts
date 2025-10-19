@@ -61,3 +61,24 @@ export async function PUT(
     return new NextResponse("Failed to get response", { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const conversation = await prisma.conversation.delete({
+      where: {
+        id,
+      },
+    });
+
+    return new NextResponse(JSON.stringify(conversation), { status: 200 });
+  } catch (error) {
+    console.error("Error:", error);
+
+    return new NextResponse("Failed to get response", { status: 500 });
+  }
+}

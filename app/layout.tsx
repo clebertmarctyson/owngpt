@@ -28,7 +28,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const conversations = await prisma.conversation.findMany({
+  const conversations = await prisma?.conversation?.findMany({
     orderBy: {
       createdAt: "desc",
     },
