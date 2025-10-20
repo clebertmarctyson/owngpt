@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { Trash } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -19,6 +19,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 
+import { queryClient } from "@/components/providers";
+
 export default function DeleteButton({
   conversationId,
   onDeleted,
@@ -26,7 +28,10 @@ export default function DeleteButton({
   conversationId: string;
   onDeleted?: () => void;
 }) {
+  const { id } = useParams();
+
   const router = useRouter();
+
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -40,7 +45,12 @@ export default function DeleteButton({
 
       toast.success("Conversation deleted");
       onDeleted?.();
-      router.push("/conversations");
+      await queryClient.invalidateQueries({ queryKey: ["conversations"] });
+
+      if (id === conversationId) {
+        router.push("/conversations");
+      }
+
       router.refresh();
     } catch (error) {
       console.error("Error:", error);
@@ -58,7 +68,7 @@ export default function DeleteButton({
           disabled={isDeleting}
           onClick={(e) => e.stopPropagation()}
         >
-          <Trash2 size={16} className="text-destructive" />
+          <Trash size={16} className="text-destructive" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent onClick={(e) => e.stopPropagation()}>

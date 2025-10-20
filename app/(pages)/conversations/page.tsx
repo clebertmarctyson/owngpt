@@ -32,8 +32,14 @@ export default async function Conversations({
         <SearchInput className="flex-1 h-full flex gap-4 p-4 items-center rounded-sm bg-accent" />
       </div>
 
+      {conversations.length === 0 && (
+        <div className="flex flex-col items-center justify-center gap-4">
+          <p className="text-lg">No conversations found</p>
+        </div>
+      )}
+
       <div className="flex flex-col gap-4 py-4 box-border h-[calc(100%-8rem)] overflow-y-scroll no-scrollbar">
-        {conversations?.map((conversation) => (
+        {conversations.map((conversation) => (
           <div
             key={conversation.id}
             className="flex gap-4 items-center justify-between bg-black w-full rounded-sm p-2"
