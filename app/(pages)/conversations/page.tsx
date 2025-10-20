@@ -1,10 +1,9 @@
 import Link from "next/link";
-
 import { LinkIcon, Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ConversationService } from "@/services/conversation.service";
-
 import SearchInput from "@/components/SearchInput";
+import DeleteButton from "@/components/conversation/DeleteButton";
 
 export default async function Conversations({
   searchParams,
@@ -36,14 +35,22 @@ export default async function Conversations({
 
       <div className="flex flex-col gap-4 py-4 box-border h-[calc(100%-8rem)] overflow-y-scroll no-scrollbar">
         {conversations?.map((conversation) => (
-          <Link
+          <div
             key={conversation.id}
-            href={`/conversations/${conversation.id}`}
-            className="flex gap-4 items-start justify-between bg-black w-full rounded-sm p-2"
+            className="flex gap-4 items-center justify-between bg-black w-full rounded-sm p-2"
           >
             <p className="w-[80%] text-lg">{conversation.title}</p>
-            <LinkIcon size={18} color="blue" />
-          </Link>
+
+            <div className="flex gap-4 items-center">
+              <Link
+                href={`/conversations/${conversation.id}`}
+                className="flex gap-4 items-center flex-1"
+              >
+                <LinkIcon size={20} color="blue" />
+              </Link>
+              <DeleteButton conversationId={conversation.id} />
+            </div>
+          </div>
         ))}
       </div>
     </div>

@@ -13,3 +13,14 @@ export type ConversationListItem = Pick<
   Conversation,
   "id" | "title" | "createdAt"
 >;
+
+export type CreateConversationInput = {
+  firstMessage: string;
+  model: string;
+};
+
+export type StreamChunk = {
+  content?: string;
+  done?: boolean;
+  error?: string;
+};
