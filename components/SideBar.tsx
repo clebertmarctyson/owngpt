@@ -1,7 +1,8 @@
 "use client";
 
-import { FolderArchive, MessageCircle, Plus } from "lucide-react";
-
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import DeleteButton from "@/components/conversation/DeleteButton";
 import {
   Sidebar,
   SidebarContent,
@@ -14,38 +15,43 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-import Link from "next/link";
-import DeleteButton from "@/components/conversation/DeleteButton";
+import { API_ENDPOINTS, APP_CONFIG } from "@/lib/constants";
+import { FolderArchive, MessageCircle, Plus } from "lucide-react";
 
-import { Conversation } from "@prisma/client";
-
-const items = [
-  {
-    title: "Projects",
-    url: "/projects",
-    icon: FolderArchive,
-  },
-  {
-    title: "Conversations",
-    url: "/conversations",
-    icon: MessageCircle,
-  },
-];
-
-const SideBar = ({
-  conversations,
-  ...props
-}: {
-  conversations: Conversation[];
-} & React.ComponentProps<typeof Sidebar>) => {
+export default function SidebarClient() {
   const { open } = useSidebar();
 
+  const { data: conversations = [], isLoading } = useQuery({
+    queryKey: ["conversations"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${API_ENDPOINTS.conversations}?limit=${APP_CONFIG.recentConversationsLimit}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch conversations");
+
+      return res.json();
+    },
+    initialData: [],
+    enabled: open,
+  });
+
+  const items = [
+    { title: "Conversations", url: "/conversations", icon: MessageCircle },
+  ];
+
   return (
-    <Sidebar {...props}>
+    <Sidebar>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="font-bold text-2xl mb-8">
-            OwnGPT
+            {APP_CONFIG.name}
           </SidebarGroupLabel>
           <SidebarGroupContent className="space-y-4">
             <SidebarMenu>
@@ -68,24 +74,32 @@ const SideBar = ({
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
+
             {open && (
               <SidebarMenu>
                 <SidebarGroupLabel>Recents</SidebarGroupLabel>
-
-                {conversations.map((conversation) => (
-                  <SidebarMenuItem key={conversation.id}>
-                    <div className="flex items-center justify-between w-full group">
-                      <SidebarMenuButton asChild className="flex-1">
-                        <Link href={`/conversations/${conversation.id}`}>
-                          <span className="truncate">{conversation.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <DeleteButton conversationId={conversation.id} />
+                {isLoading ? (
+                  <div className="p-4 text-sm text-muted-foreground">
+                    Loading...
+                  </div>
+                ) : (
+                  conversations.map((conversation: any) => (
+                    <SidebarMenuItem key={conversation.id}>
+                      <div className="flex items-center justify-between w-full group">
+                        <SidebarMenuButton asChild className="flex-1">
+                          <Link href={`/conversations/${conversation.id}`}>
+                            <span className="truncate">
+                              {conversation.title}
+                            </span>
+                          </Link>
+                        </SidebarMenuButton>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <DeleteButton conversationId={conversation.id} />
+                        </div>
                       </div>
-                    </div>
-                  </SidebarMenuItem>
-                ))}
+                    </SidebarMenuItem>
+                  ))
+                )}
               </SidebarMenu>
             )}
           </SidebarGroupContent>
@@ -93,6 +107,4 @@ const SideBar = ({
       </SidebarContent>
     </Sidebar>
   );
-};
-
-export default SideBar;
+}
