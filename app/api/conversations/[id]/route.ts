@@ -1,7 +1,6 @@
-import { prisma } from "@/lib/prisma";
-import { Role } from "@prisma/client";
-
 import { NextRequest, NextResponse } from "next/server";
+import { ConversationService } from "@/services/conversation.service";
+import { MessageInput } from "@/types/conversation.types";
 
 export async function GET(
   req: NextRequest,
@@ -9,27 +8,15 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-
-    const conversation = await prisma.conversation.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        messages: true,
-      },
-    });
-
-    return new NextResponse(JSON.stringify(conversation), { status: 200 });
+    const conversation = await ConversationService.getById(id);
+    return NextResponse.json(conversation, { status: 200 });
   } catch (error) {
     console.error("Error:", error);
-
-    return new NextResponse("Failed to get response", { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to get conversation" },
+      { status: 500 }
+    );
   }
-}
-
-interface Message {
-  role: Role;
-  content: string;
 }
 
 export async function PUT(
@@ -38,26 +25,31 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const { message }: { message: Message } = await req.json();
-
-    const conversation = await prisma.conversation.update({
-      where: {
-        id,
-      },
-      data: {
-        messages: {
-          create: {
-            role: message.role,
-            content: message.content,
-          },
-        },
-      },
-    });
-
-    return new NextResponse(JSON.stringify(conversation), { status: 200 });
+    const { message }: { message: MessageInput } = await req.json();
+    const conversation = await ConversationService.addMessage(id, message);
+    return NextResponse.json(conversation, { status: 200 });
   } catch (error) {
     console.error("Error:", error);
+    return NextResponse.json(
+      { error: "Failed to update conversation" },
+      { status: 500 }
+    );
+  }
+}
 
-    return new NextResponse("Failed to get response", { status: 500 });
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const conversation = await ConversationService.deleteConversation(id);
+    return NextResponse.json(conversation, { status: 200 });
+  } catch (error) {
+    console.error("Error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete conversation" },
+      { status: 500 }
+    );
   }
 }

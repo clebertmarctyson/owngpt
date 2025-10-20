@@ -1,40 +1,25 @@
 import Link from "next/link";
 
 import { LinkIcon, Plus } from "lucide-react";
-
 import { Separator } from "@/components/ui/separator";
-
-import { prisma } from "@/lib/prisma";
+import { ConversationService } from "@/services/conversation.service";
 
 import SearchInput from "@/components/SearchInput";
-import { Button } from "@/components/ui/button";
 
-const Conversations = async ({
+export default async function Conversations({
   searchParams,
 }: {
   searchParams: Promise<{ search: string }>;
-}) => {
+}) {
   const { search } = await searchParams;
 
   const conversations = search
-    ? await prisma.conversation.findMany({
-        where: {
-          title: {
-            contains: search,
-          },
-        },
-      })
-    : await prisma.conversation.findMany({
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 50,
-      });
+    ? await ConversationService.search(search)
+    : await ConversationService.getRecent(50);
 
   return (
     <div className="w-[50vw] h-screen overflow-hidden mx-auto py-8 relative flex flex-col gap-8">
       <h1 className="text-3xl font-bold">Conversations</h1>
-
       <Separator />
 
       <div className="flex justify-between items-center gap-8">
@@ -53,16 +38,14 @@ const Conversations = async ({
         {conversations?.map((conversation) => (
           <Link
             key={conversation.id}
-            href={`/conversations/${conversation?.id}`}
+            href={`/conversations/${conversation.id}`}
             className="flex gap-4 items-start justify-between bg-black w-full rounded-sm p-2"
           >
-            <p className="w-[80%] text-lg">{conversation?.title}</p>
+            <p className="w-[80%] text-lg">{conversation.title}</p>
             <LinkIcon size={18} color="blue" />
           </Link>
         ))}
       </div>
     </div>
   );
-};
-
-export default Conversations;
+}
