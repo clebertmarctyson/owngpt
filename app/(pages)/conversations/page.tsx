@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { LinkIcon, Plus } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 import { ConversationService } from "@/services/conversation.service";
 import SearchInput from "@/components/SearchInput";
 import DeleteButton from "@/components/conversation/DeleteButton";
+import { Separator } from "@/components/ui/separator";
 
 export default async function Conversations({
   searchParams,
@@ -14,11 +14,10 @@ export default async function Conversations({
 
   const conversations = search
     ? await ConversationService.search(search)
-    : await ConversationService.getRecent(50);
+    : await ConversationService.getAll();
 
   return (
-    <div className="w-[50vw] h-screen overflow-hidden mx-auto py-8 relative flex flex-col gap-8">
-      <h1 className="text-3xl font-bold">Conversations</h1>
+    <div className="w-[50vw] h-screen overflow-hidden mx-auto py-8 relative flex flex-col gap-10">
       <Separator />
 
       <div className="flex justify-between items-center gap-8">

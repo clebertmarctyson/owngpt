@@ -25,3 +25,23 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function GET(req: NextRequest) {
+  const query = req.nextUrl.searchParams.get("search");
+  const limit = req.nextUrl.searchParams.get("limit");
+
+  try {
+    const conversations = query
+      ? await ConversationService.search(query)
+      : limit
+      ? await ConversationService.getRecent(parseInt(limit))
+      : await ConversationService.getAll();
+    return NextResponse.json(conversations, { status: 200 });
+  } catch (error) {
+    console.error("Error getting conversations:", error);
+    return NextResponse.json(
+      { error: "Failed to get conversations" },
+      { status: 500 }
+    );
+  }
+}

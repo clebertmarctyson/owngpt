@@ -3,6 +3,12 @@ import { MessageInput } from "@/types/conversation.types";
 import { Role } from "@prisma/client";
 
 export class ConversationService {
+  static async getAll() {
+    return prisma.conversation.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   static async getById(id: string) {
     return prisma.conversation.findUnique({
       where: { id },

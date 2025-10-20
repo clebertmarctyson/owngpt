@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+
 import {
   Form,
   FormControl,
@@ -17,6 +18,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+
 import {
   Select,
   SelectContent,
@@ -35,12 +37,16 @@ export default function ConversationForm() {
   const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_MODEL);
   const [streamingContent, setStreamingContent] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [pendingUserMessage, setPendingUserMessage] = useState("");
 
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: async (values: MessageFormData) => {
       const { content, model } = values;
 
-      // Add user message
+      // Store user message for display
+      setPendingUserMessage(content);
+
+      // Add user message to database
       await fetch(`/api/conversations/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -49,6 +55,7 @@ export default function ConversationForm() {
         }),
       });
 
+      // Invalidate to show user message immediately
       await queryClient.invalidateQueries({ queryKey: ["conversation", id] });
 
       // Get streaming response
@@ -67,6 +74,7 @@ export default function ConversationForm() {
 
       setIsStreaming(true);
       setStreamingContent("");
+      setPendingUserMessage("");
 
       const reader = stream.getReader();
       const decoder = new TextDecoder();
@@ -119,6 +127,7 @@ export default function ConversationForm() {
       console.error("Error:", error);
       toast.error("Failed to get AI response");
       setIsStreaming(false);
+      setPendingUserMessage("");
     },
   });
 
@@ -136,10 +145,29 @@ export default function ConversationForm() {
 
   return (
     <>
-      {isStreaming && streamingContent && (
+      {/* Display pending user message */}
+      {pendingUserMessage && (
         <div className="mb-4 p-4 bg-secondary/30 rounded-lg">
+          <div className="flex gap-4 items-start">
+            <div className="flex gap-2 items-center">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-sm">You</span>
+              </div>
+            </div>
+            <p className="text-base text-foreground/90 flex-1">
+              {pendingUserMessage}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Display streaming AI response */}
+      {isStreaming && streamingContent && (
+        <div className="mb-4 p-4 bg-[#1e1e1e] rounded-2xl border border-[#2e2e2e]">
           <p className="text-sm text-muted-foreground mb-2">AI is typing...</p>
-          <p className="text-foreground">{streamingContent}</p>
+          <div className="text-foreground whitespace-pre-wrap">
+            {streamingContent}
+          </div>
         </div>
       )}
 
