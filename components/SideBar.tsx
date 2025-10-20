@@ -16,12 +16,18 @@ import {
 } from "@/components/ui/sidebar";
 
 import { API_ENDPOINTS, APP_CONFIG } from "@/lib/constants";
-import { FolderArchive, MessageCircle, Plus } from "lucide-react";
+import { MessageCircle, Plus } from "lucide-react";
+
+type Conversation = {
+  id: string;
+  title: string;
+  createdAt: Date;
+};
 
 export default function SidebarClient() {
   const { open } = useSidebar();
 
-  const { data: conversations = [], isLoading } = useQuery({
+  const { data: conversations = [], isLoading } = useQuery<Conversation[]>({
     queryKey: ["conversations"],
     queryFn: async () => {
       const res = await fetch(
@@ -82,8 +88,12 @@ export default function SidebarClient() {
                   <div className="p-4 text-sm text-muted-foreground">
                     Loading...
                   </div>
+                ) : conversations.length === 0 ? (
+                  <div className="p-4 text-sm text-muted-foreground">
+                    No conversations yet
+                  </div>
                 ) : (
-                  conversations.map((conversation: any) => (
+                  conversations.map((conversation) => (
                     <SidebarMenuItem key={conversation.id}>
                       <div className="flex items-center justify-between w-full group">
                         <SidebarMenuButton asChild className="flex-1">

@@ -15,9 +15,9 @@ export async function POST(req: NextRequest) {
         Connection: "keep-alive",
       },
     });
-  } catch (error) {
-    console.error("Error:", error);
-    return new Response(JSON.stringify({ error: "Failed to get response" }), {
+  } catch (error: any) {
+    console.error("Error in /api/chat/stream:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
     });
   }

@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-
 import {
   Form,
   FormControl,
@@ -16,7 +15,6 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-
 import {
   Select,
   SelectContent,
@@ -24,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { ArrowUp } from "lucide-react";
 
 import { AI_MODELS, DEFAULT_MODEL, API_ENDPOINTS } from "@/lib/constants";
@@ -34,10 +31,7 @@ export default function NewConversationForm() {
 
   const form = useForm<MessageFormData>({
     resolver: zodResolver(messageSchema),
-    defaultValues: {
-      content: "",
-      model: DEFAULT_MODEL,
-    },
+    defaultValues: { content: "", model: DEFAULT_MODEL },
   });
 
   const createConversation = useMutation({
@@ -50,16 +44,11 @@ export default function NewConversationForm() {
         }),
       });
       if (!res.ok) throw new Error();
-
       return res.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      router.refresh();
-      router.push(`/conversations/${data.conversationId}`);
-    },
-    onError: () => {
-      console.error("Error creating conversation");
+      router.push(`/conversations/${data.conversationId}?stream=true`);
     },
   });
 
