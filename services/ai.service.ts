@@ -1,11 +1,40 @@
 import { Role } from "@prisma/client";
-
-import { ChatRequest, ChatResponse } from "@/types/api.types";
+import { ChatRequest } from "@/types/api.types";
+import { APP_CONFIG } from "@/lib/constants";
 
 export class AIService {
   private static readonly BASE_URL = "http://localhost:11434/api/chat";
 
-  static async sendMessage(request: ChatRequest): Promise<ChatResponse> {
+  static async generateTitle(message: string, model: string): Promise<string> {
+    const response = await fetch(this.BASE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: Role.user,
+            content: `${APP_CONFIG.titleGenerationPrompt}\n\n"${message}"`,
+          },
+        ],
+        stream: false,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to generate title");
+    }
+
+    const data = await response.json();
+
+    return data.message.content.trim().replace(/['"]/g, "");
+  }
+
+  static async sendMessageStream(
+    request: ChatRequest
+  ): Promise<ReadableStream> {
     const response = await fetch(this.BASE_URL, {
       method: "POST",
       headers: {
@@ -19,7 +48,7 @@ export class AIService {
             content: request.content,
           },
         ],
-        stream: false,
+        stream: true,
       }),
     });
 
@@ -27,8 +56,6 @@ export class AIService {
       throw new Error("Failed to get AI response");
     }
 
-    const data = await response.json();
-
-    return data.message;
+    return response.body!;
   }
 }

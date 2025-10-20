@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/prisma";
-
 import { MessageInput } from "@/types/conversation.types";
+import { Role } from "@prisma/client";
 
 export class ConversationService {
   static async getById(id: string) {
     return prisma.conversation.findUnique({
       where: { id },
-      include: { messages: true },
+      include: { messages: { orderBy: { createdAt: "asc" } } },
     });
   }
 
@@ -22,6 +22,22 @@ export class ConversationService {
       where: {
         title: {
           contains: query,
+          mode: "insensitive",
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  static async create(title: string, firstMessage: string) {
+    return prisma.conversation.create({
+      data: {
+        title,
+        messages: {
+          create: {
+            role: Role.user,
+            content: firstMessage,
+          },
         },
       },
     });
@@ -41,9 +57,9 @@ export class ConversationService {
     });
   }
 
-  static async deleteConversation(conversationId: string) {
+  static async delete(id: string) {
     return prisma.conversation.delete({
-      where: { id: conversationId },
+      where: { id },
     });
   }
 }

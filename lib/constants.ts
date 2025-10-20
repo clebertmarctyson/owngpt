@@ -9,11 +9,11 @@ export const DEFAULT_MODEL = AI_MODELS[1].value;
 export const APP_CONFIG = {
   name: "OwnGPT",
   recentConversationsLimit: 20,
+  titleGenerationPrompt:
+    "Generate a short, concise title (max 6 words) for a conversation that starts with this message. Return ONLY the title, nothing else:",
 } as const;
 
-export const BASE_API_URL = "/api";
-
 export const API_ENDPOINTS = {
-  chat: `${BASE_API_URL}/chat`,
-  conversations: `${BASE_API_URL}/conversations`,
+  chat: "/api/chat",
+  conversations: "/api/conversations",
 } as const;

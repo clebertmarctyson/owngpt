@@ -43,8 +43,11 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const conversation = await ConversationService.deleteConversation(id);
-    return NextResponse.json(conversation, { status: 200 });
+    await ConversationService.delete(id);
+    return NextResponse.json(
+      { message: "Conversation deleted" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error:", error);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 "use client";
 
-import { FolderArchive, MessageCircle, Plus, Trash } from "lucide-react";
+import { FolderArchive, MessageCircle, Plus } from "lucide-react";
 
 import {
   Sidebar,
@@ -15,16 +15,9 @@ import {
 } from "@/components/ui/sidebar";
 
 import Link from "next/link";
+import DeleteButton from "@/components/conversation/DeleteButton";
 
 import { Conversation } from "@prisma/client";
-
-import { useMutation } from "@tanstack/react-query";
-
-import { API_ENDPOINTS } from "@/lib/constants";
-
-import { useRouter } from "next/navigation";
-
-import { queryClient } from "@/components/providers";
 
 const items = [
   {
@@ -45,24 +38,7 @@ const SideBar = ({
 }: {
   conversations: Conversation[];
 } & React.ComponentProps<typeof Sidebar>) => {
-  const router = useRouter();
-
   const { open } = useSidebar();
-
-  const { mutate: deleteConversation } = useMutation({
-    mutationFn: async (conversationId: string) => {
-      await fetch(`${API_ENDPOINTS.conversations}/${conversationId}`, {
-        method: "DELETE",
-      });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      router.refresh();
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
 
   return (
     <Sidebar {...props}>
@@ -97,21 +73,17 @@ const SideBar = ({
                 <SidebarGroupLabel>Recents</SidebarGroupLabel>
 
                 {conversations.map((conversation) => (
-                  <SidebarMenuItem
-                    key={conversation.id}
-                    className="flex gap-0.5 items-center"
-                  >
-                    <Trash
-                      className="cursor-pointer"
-                      size={20}
-                      onClick={() => deleteConversation(conversation.id)}
-                    />
-
-                    <SidebarMenuButton asChild>
-                      <Link href={`/conversations/${conversation.id}`}>
-                        <span>{conversation.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                  <SidebarMenuItem key={conversation.id}>
+                    <div className="flex items-center justify-between w-full group">
+                      <SidebarMenuButton asChild className="flex-1">
+                        <Link href={`/conversations/${conversation.id}`}>
+                          <span className="truncate">{conversation.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <DeleteButton conversationId={conversation.id} />
+                      </div>
+                    </div>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
